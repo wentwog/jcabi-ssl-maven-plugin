@@ -113,15 +113,15 @@ public final class KeygenMojo extends AbstractMojo {
         final Keystore store = new Keystore(
             DigestUtils.md5Hex(this.getClass().getName())
         );
-        if (!store.isActive()) {
-            try {
+        try {
+            final Cacerts truststore = new Cacerts(this.cacerts);
+            if (!store.isActive()) {
                 store.activate(this.keystore);
-                final Cacerts truststore = new Cacerts(this.cacerts);
                 truststore.imprt();
-                truststore.populate(this.project.getProperties());
-            } catch (final java.io.IOException ex) {
-                throw new IllegalStateException(ex);
             }
+            truststore.populate(this.project.getProperties());
+        } catch (final java.io.IOException ex) {
+            throw new IllegalStateException(ex);
         }
         store.populate(this.project.getProperties());
         Logger.info(this, "Keystore is active: %s", store);
